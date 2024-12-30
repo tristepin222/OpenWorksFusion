@@ -1,0 +1,64 @@
+@startuml
+
+title Sequence Diagram for ContentManager
+
+actor User
+participant ContentManager
+participant ModManager
+participant DownloadManager
+participant NetworkRunner
+participant SceneManager
+
+User -> ContentManager: Start()
+activate ContentManager
+ContentManager -> ModManager: Subscribe to ModFound, ModLoaded
+
+ContentManager -> ContentManager: Update()
+alt loadingMod is null and modRequests is not empty
+    ContentManager -> ContentManager: DownloadMod(modRequests.FirstOrDefault().Value)
+    activate ContentManager
+        ContentManager -> DownloadManager: DownloadModByAuthorAndName(modName, authorName)
+        DownloadManager --> ContentManager: id
+        ContentManager -> ContentManager: HandleDownloadedMod(id)
+        ContentManager -> ContentManager: SearchForFolderWithPrefix(modsFolder, id)
+        ContentManager -> ModManager: AddSearchDirectory(modFolder)
+        ContentManager -> ModManager: Refresh()
+    deactivate ContentManager
+end
+
+User -> ContentManager: SetScene(authorName, modName)
+activate ContentManager
+ContentManager -> NetworkRunner: Spawn(TransformSynchronizerPrefab)
+NetworkRunner --> ContentManager: TransformSynchronizer instance
+ContentManager -> ContentManager: Set properties of TransformSynchronizer
+
+User -> ContentManager: SpawnContent(authorName, modName, contentName)
+activate ContentManager
+ContentManager -> NetworkRunner: Spawn(TransformSynchronizerPrefab)
+NetworkRunner --> ContentManager: TransformSynchronizer instance
+ContentManager -> ContentManager: Set properties of TransformSynchronizer
+ContentManager -> ContentManager: Add to contentSynchronizers
+
+User -> ContentManager: RequestMod(authorName, modName)
+ContentManager -> ContentManager: Check if mod exists in mods or modRequests
+alt mod not found
+    ContentManager -> ContentManager: Add mod to modRequests
+end
+
+ModManager -> ContentManager: OnModFound(mod)
+activate ContentManager
+ContentManager -> Mod: Load()
+deactivate ContentManager
+
+ModManager -> ContentManager: OnModLoaded(mod)
+activate ContentManager
+ContentManager -> ContentManager: Add mod to mods
+ContentManager -> ContentManager: Reset loadingMod
+
+User -> ContentManager: UnloadScene()
+activate ContentManager
+ContentManager -> sceneSynchronizer: Runner.Despawn(sceneSynchronizer.Object)
+ContentManager -> SceneManager: UnloadSceneAsync(scene)
+deactivate ContentManager
+
+@enduml

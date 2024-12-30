@@ -1,0 +1,31 @@
+@startuml
+
+autonumber
+actor User
+participant UI_ModList
+participant ModIOManager
+participant ModProfile
+participant UI_ModItem
+
+User -> UI_ModList : Start()
+activate UI_ModList
+UI_ModList -> UI_ModList : ShowScenes()
+UI_ModList -> ModIOManager : FindModsByTag("Scene")
+activate ModIOManager
+ModIOManager -> ModProfile : return List<ModProfile>
+deactivate ModIOManager
+loop for each ModProfile
+    UI_ModList -> UI_ModList : AddItemToGrid(mod)
+    activate UI_ModList
+    UI_ModList -> UI_ModItem : Instantiate modItemPrefab
+    UI_ModList -> ModIOManager : DownloadImage(mod)
+    activate ModIOManager
+    ModIOManager --> UI_ModItem : return image texture
+    deactivate ModIOManager
+    UI_ModItem -> UI_ModItem : Set mod properties (text, author, etc.)
+    deactivate UI_ModList
+end
+
+deactivate UI_ModList
+
+@enduml

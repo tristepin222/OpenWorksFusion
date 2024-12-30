@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1009295391, guid: b981ac5fea65cbf46ab728daad9c9206, type: 3}
+  m_Name: ModToolSettings
+  m_EditorClassIdentifier: 
+  _productName: ASW
+  _unityVersion: 2022.3.30f1
+  _supportedPlatforms: 15
+  _supportedContent: 7
+  _logLevel: 3
+  _sharedAssets:
+  - Assets/SDK/QuaD.asmdef
+  - Assets/SDK/QuaD_Content.cs
+  - Assets/SDK/QuaD_SDK.cs
+  - Assets/SDK/QuaD_SyncTransform.cs
+  _sharedPackages: []

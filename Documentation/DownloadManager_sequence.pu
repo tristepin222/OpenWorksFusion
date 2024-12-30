@@ -1,0 +1,33 @@
+@startuml
+
+autonumber
+actor User
+participant DownloadManager
+participant ModIOManager
+
+
+User -> DownloadManager : DownloadMod(modName)
+activate DownloadManager
+DownloadManager -> ModIOManager : FindModByName(modName)
+ModIOManager --> DownloadManager : return ModProfile
+
+DownloadManager -> ModIOManager : SubscribeToMod(mod)
+ModIOManager --> DownloadManager : Subscription complete
+DownloadManager --> User : return modId
+
+
+deactivate DownloadManager
+
+User -> DownloadManager : DownloadModByAuthorAndName(modName, authorName)
+activate DownloadManager
+DownloadManager -> ModIOManager : FindModByNameAndAuthor(modName, authorName)
+ModIOManager --> DownloadManager : return ModProfile
+
+DownloadManager -> ModIOManager : SubscribeToMod(mod)
+ModIOManager --> DownloadManager : Subscription complete
+DownloadManager --> User : return modId
+
+
+deactivate DownloadManager
+
+@enduml

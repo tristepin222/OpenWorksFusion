@@ -1,0 +1,80 @@
+@startuml
+actor User
+participant TransformSynchronizer
+participant ContentManager
+participant ModData
+participant Scene
+participant GameObject
+participant NetworkArray
+participant TextMeshPro
+participant Effect
+participant Material
+
+User -> TransformSynchronizer: Spawned()
+activate TransformSynchronizer
+TransformSynchronizer -> TransformSynchronizer: Awake()
+TransformSynchronizer -> Material: Create defaultMaterial
+Material --> TransformSynchronizer: defaultMaterial
+
+TransformSynchronizer -> TransformSynchronizer: StartCoroutine(LoadingRoutine())
+
+loop While isSceneContent == false \nand contentName.Length == 0
+    TransformSynchronizer -> TransformSynchronizer: yield return null
+end
+
+activate ContentManager
+TransformSynchronizer -> ContentManager: RequestMod(contentAuthor, contentMod)
+alt mod == null
+    TransformSynchronizer -> TransformSynchronizer: yield return null
+else mod != null
+    ContentManager --> TransformSynchronizer: ModData
+end
+deactivate ContentManager
+
+alt isSceneContent
+    TransformSynchronizer -> ModData: Access mod.scenes
+    ModData -> Scene: Get scene by name
+    Scene -> Scene: Load()
+    
+    loop While scene.isLoaded == false
+        TransformSynchronizer -> TransformSynchronizer: yield return null
+    end
+    
+    TransformSynchronizer -> ContentManager: Update sceneSynchronizer
+    TransformSynchronizer -> TransformSynchronizer: PrepareScene(scene)
+else isContent
+    TransformSynchronizer -> ModData: GetAsset(contentName)
+    ModData --> TransformSynchronizer: GameObject
+    TransformSynchronizer -> GameObject: Instantiate()
+    TransformSynchronizer -> TransformSynchronizer: PrepareContent(g)
+end
+
+alt HasStateAuthority
+    loop For each transform
+        TransformSynchronizer -> NetworkArray: Set locationData
+    end
+else Not HasStateAuthority
+    loop For each transform
+        NetworkArray -> TransformSynchronizer: Get locationData
+        TransformSynchronizer -> Transform: Update positions/rotations
+    end
+end
+
+loop For each textMesh
+    TransformSynchronizer -> TextMeshPro: Compare text
+    alt Text changed
+        TransformSynchronizer -> NetworkArray: Update texts
+    end
+end
+
+loop PlayEffect(effectName)
+    TransformSynchronizer -> Effect: Find matching effect
+    alt Effect found
+        TransformSynchronizer -> Effect: Play particle/audio
+    else Effect not found
+        TransformSynchronizer -> TransformSynchronizer: Return
+    end
+end
+
+deactivate TransformSynchronizer
+@enduml

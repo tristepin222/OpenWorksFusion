@@ -1,0 +1,149 @@
+@startuml
+
+class ContentManager {
+    + static main : ContentManager
+    + syncedList : List<Transform>
+    + contentSynchronizers : List<TransformSynchronizer>
+    + TransformSynchronizerPrefab : NetworkObject
+    + sceneSynchronizer : TransformSynchronizer
+    - const GAME_ID : long = 2708
+    + scene : Scene
+    + mods : Dictionary<string, ModData>
+    + modRequests : Dictionary<string, ModData>
+    + loadingMod : ModData
+    - Awake() : void
+    - Start() : void
+    + SetScene(authorName : string, modName : string) : void
+    + SpawnContent(authorName : string, modName : string, contentName : string) : void
+    + UnloadScene() : void
+    + ProcessMod(uI_ModItem : UI_ModItem) : void
+    # Update() : void
+    + RequestMod(authorName : string, modName : string) : ModData
+    + DownloadMod(modData : ModData) : void
+    - HandleDownloadedMod(id : long) : void
+    - OnModFound(mod : Mod) : void
+    - OnModLoaded(mod : Mod) : void
+    # SearchForFolderWithPrefix(searchPath : string, id : string) : string
+}
+
+class ModData {
+    + authorName : string
+    + modName : string
+    + mod : Mod
+    # requesters : List<GameObject>
+    + ModData(authorName : string, modName : string)
+}
+
+class ContentErrorNotifier {
+    + static void NotifyError(errorMessage: string)
+    + static event ContentErrorHandler OnContentError
+}
+
+class ContentErrorHandler {
+    <<delegate>>
+    + void Invoke(errorMessage: string)
+}
+
+ContentErrorNotifier --> ContentErrorHandler
+MockTest --> ContentErrorNotifier
+TransformSynchronizer --> ContentErrorNotifier
+
+class MockTest {
+    - void Start()
+    - void Update()
+    - IEnumerator TestRoutine()
+    - void OnSceneLoad(scene: Scene, loadSceneMode: LoadSceneMode)
+    - void TestSceneHasObjects()
+    - void TestSceneHasSpecificObjects()
+    - void TestCubesHaveMovementScript()
+    - bool HasScriptWithName(obj: GameObject, scriptName: string)
+    - IEnumerator TestCubesPositionChange()
+    - void TestSpherePresence()
+    - void TestCapsulePresence()
+    - void TestCubeAbsence(error: string)
+}
+
+class Mod {
+    + Load() : void
+    + scenes : List<ModScene>
+}
+
+class ModScene {
+    + Load() : void
+}
+
+class ModManager {
+    + AddSearchDirectory(path : string) : void
+    + Refresh() : void
+    + ModFound : event
+    + ModLoaded : event
+}
+
+class DownloadManager {
+    + main : DownloadManager
+    + DownloadMod(modName : string) : Task<long>
+    + DownloadModByAuthorAndName(modName : string, authorName : string) : Task<long>
+}
+
+class ModIOManager {
+    + Start() : void
+}
+
+class TransformSynchronizer {
+    + bool isSceneContent { get; set; }
+    + string contentAuthor { get; set; }
+    + string contentMod { get; set; }
+    + string contentName { get; set; }
+    + Material defaultMaterial
+    + Transform[] transforms : 100
+    + GameObject[] effects : 100
+    + TextMeshPro[] textMeshes : 20
+    + int transformsCounter
+    + int effectsCounter
+    + int textsCounter
+
+    + override void Spawned()
+    + IEnumerator LoadingRoutine()
+    + void PrepareScene(scene: Scene)
+    + void PrepareContent(g: GameObject)
+    + void ScanGameObject(obj: GameObject)
+    + override void FixedUpdateNetwork()
+    + void PlayEffect(effectName : string)
+    + [Rpc] void RPC_PlayEffect(index: int, localPosition: Vector3, localRotation: Quaternion)
+    + override void Render()
+}
+
+class UI_ModItem {
+    + modTag : string
+    + text : TextField
+    + author : string
+    + contentName : string
+}
+
+class UI_ModList {
+    - modItemPrefab : GameObject
+    - gridLayoutGroup : GridLayoutGroup
+    + Start() : void
+    + ShowScenes() : void
+    + ShowContents() : void
+    - OnModsRefresh() : void
+    - ClearGrid() : void
+    - AddItemToGrid(mod : ModProfile) : void
+}
+
+ContentManager --> Mod
+ContentManager --> ModScene
+ContentManager --> ModManager
+ContentManager --> DownloadManager
+ContentManager --> TransformSynchronizer
+ContentManager --> UI_ModItem
+ContentManager --> ModData
+DownloadManager --> ModIOManager
+UI_ModList --> UI_ModItem
+UI_ModList --> ModIOManager
+
+interface IQuad_ServerBehaviour
+TransformSynchronizer ..|> NetworkBehaviour
+TransformSynchronizer ..> IQuad_ServerBehaviour : "GetComponentsInChildren"
+
+@enduml

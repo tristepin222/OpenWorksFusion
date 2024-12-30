@@ -1,0 +1,22 @@
+@startuml
+left to right direction
+
+:User: as User
+:ServerOwner: as Owner
+:Modder: as Modder
+
+
+usecase UploadMod
+usecase DownloadMod
+usecase AddContentToServer
+usecase List
+
+User <|-- Owner
+User <|-- Modder
+
+User --> List
+User --> DownloadMod
+Modder --> UploadMod
+Owner -->AddContentToServer
+
+@enduml
