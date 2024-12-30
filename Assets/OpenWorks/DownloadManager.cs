@@ -48,17 +48,6 @@ public class DownloadManager : MonoBehaviour
         return mod.id;
     }
 
-    [ContextMenu("Request Code")]
-    public void SendCode()
-    {
-        ModIOManager.RequestAuthCode();
-    }
-    [ContextMenu("Send Code")]
-    public void RecieveCode()
-    {
-        ModIOManager.SubmitAuthCode(code);
-    }
-
     private async Task CheckAuthentification()
     {
         while (true)

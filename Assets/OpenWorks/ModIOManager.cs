@@ -108,34 +108,6 @@ namespace ModIO
 
         #region Authentication
 
-        public static async void RequestAuthCode()
-        {
-            string email = "kevin.tanoh.k@gmail.com";
-            Result result = await ModIOUnityAsync.RequestAuthenticationEmail(email);
-            if (!result.Succeeded())
-            {
-                Debug.LogError($"RequestAuthenticationEmail failed: {result.message}");
-
-                return;
-            }
-
-            Debug.Log($"Authentication email sent to: {email}");
-
-        }
-
-        public static async void SubmitAuthCode(string code)
-        {
-            Result result = await ModIOUnityAsync.SubmitEmailSecurityCode(code);
-            if (!result.Succeeded())
-            {
-                Debug.LogError($"SubmitEmailSecurityCode failed: {result.message}");
-
-                return;
-            }
-
-            OnAuth();
-        }
-
         #endregion
 
 
